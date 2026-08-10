@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>අකුරු පාට කරමු - පෙරපාසල</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif; }
+        body {
+            background-color: #0f172a; color: white; padding: 15px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://img.freepik.com/free-vector/hand-drawn-flower-garden-background_23-2148802220.jpg');
+            background-size: cover; opacity: 0.1; z-index: -1; pointer-events: none;
+        }
+
+        header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        h2 { color: #ff007f; font-size: 1.4rem; }
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+        .select-container { margin-bottom: 12px; width: 100%; max-width: 320px; }
+        select {
+            width: 100%; padding: 10px; font-size: 1.1rem; border-radius: 10px;
+            background: #1e293b; color: #ff007f; border: 2px solid #ff007f;
+            font-weight: bold; text-align: center; outline: none; cursor: pointer;
+        }
+
+        .canvas-wrapper {
+            position: relative; width: 320px; height: 320px;
+            border-radius: 20px; border: 4px solid #ff007f; overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5); background: white;
+        }
+
+        .bg-watermark {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: 70%; background-repeat: no-repeat;
+            background-position: center; opacity: 0.18; pointer-events: none;
+        }
+
+        canvas { position: absolute; top: 0; left: 0; touch-action: none; cursor: crosshair; }
+
+        .nav-controls { display: flex; gap: 10px; margin-top: 12px; width: 320px; justify-content: space-between; }
+        .nav-btn { background: #ff007f; color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
+
+        .controls { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+        .color-btn { width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; cursor: pointer; }
+        .clear-btn { background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.2rem; color: #94a3b8; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">පූරණය වෙමින්...</div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+
+        <header>
+            <h2>🎨 අකුරු පාට කරමු</h2>
+            <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+        </header>
+
+        <div class="select-container">
+            <select id="letterSelect" onchange="changeLetter(this.selectedIndex)">
+            </select>
+        </div>
+
+        <div class="canvas-wrapper">
+            <div id="bgWatermark" class="bg-watermark"></div>
+            <canvas id="paintCanvas" width="320" height="320"></canvas>
+        </div>
+
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="prevLetter()">⬅ කලින් අකුර</button>
+            <button class="nav-btn" onclick="nextLetter()">ඊළඟ අකුර ➡️</button>
+        </div>
+
+        <div class="controls">
+            <div class="color-btn" style="background: #ff007f;" onclick="setColor('#ff007f')"></div>
+            <div class="color-btn" style="background: #00e676;" onclick="setColor('#00e676')"></div>
+            <div class="color-btn" style="background: #38bdf8;" onclick="setColor('#38bdf8')"></div>
+            <div class="color-btn" style="background: #ffb703;" onclick="setColor('#ffb703')"></div>
+            <div class="color-btn" style="background: #a855f7;" onclick="setColor('#a855f7')"></div>
+            <button class="clear-btn" onclick="clearCanvas()">මකන්න 🧹</button>
+        </div>
+
+    </div>
+
+    <!-- Firebase Authentication Check -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003004594",
+            appId: "1:635003004594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('pageContent').classList.remove('hidden');
+                // මෙතැන initApp() Call කිරීමෙන් දෝෂය විසඳේ
+                window.initApp();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+
+    <script>
+        const items = [
+            // ස්වර
+            { char: "අ", img: "https://cdn-icons-png.flaticon.com/512/375/375238.png" },
+            { char: "ආ", img: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png" },
+            { char: "ඇ", img: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png" },
+            { char: "ඈ", img: "https://cdn-icons-png.flaticon.com/512/2909/2909761.png" },
+            { char: "ඉ", img: "https://cdn-icons-png.flaticon.com/512/869/869869.png" },
+            { char: "ඊ", img: "https://cdn-icons-png.flaticon.com/512/9331/9331006.png" },
+            { char: "උ", img: "https://cdn-icons-png.flaticon.com/512/1080/1080985.png" },
+            { char: "ඌ", img: "https://cdn-icons-png.flaticon.com/512/2619/2619280.png" },
+            { char: "එ", img: "https://cdn-icons-png.flaticon.com/512/1998/1998610.png" },
+            { char: "ඒ", img: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png" },
+            { char: "ඔ", img: "https://cdn-icons-png.flaticon.com/512/2838/2838779.png" },
+            { char: "ඕ", img: "https://cdn-icons-png.flaticon.com/512/831/831317.png" },
+            
+            // ව්‍යංජන
+            { char: "ක", img: "https://cdn-icons-png.flaticon.com/512/1791/1791330.png" },
+            { char: "ඛ", img: "https://cdn-icons-png.flaticon.com/512/2972/2972531.png" },
+            { char: "ග", img: "https://cdn-icons-png.flaticon.com/512/489/489969.png" },
+            { char: "ඝ", img: "https://cdn-icons-png.flaticon.com/512/1500/1500424.png" },
+            { char: "ච", img: "https://cdn-icons-png.flaticon.com/512/616/616430.png" },
+            { char: "ඡ", img: "https://cdn-icons-png.flaticon.com/512/1042/1042339.png" },
+            { char: "ජ", img: "https://cdn-icons-png.flaticon.com/512/3199/3199830.png" },
+            { char: "ඤ", img: "https://cdn-icons-png.flaticon.com/512/2491/2491921.png" },
+            { char: "ට", img: "https://cdn-icons-png.flaticon.com/512/1170/1170576.png" },
+            { char: "ඨ", img: "https://cdn-icons-png.flaticon.com/512/3345/3345391.png" },
+            { char: "ඩ", img: "https://cdn-icons-png.flaticon.com/512/3014/3014288.png" },
+            { char: "ණ", img: "https://cdn-icons-png.flaticon.com/512/235/235384.png" },
+            { char: "ත", img: "https://cdn-icons-png.flaticon.com/512/3594/3594163.png" },
+            { char: "ථ", img: "https://cdn-icons-png.flaticon.com/512/3050/3050525.png" },
+            { char: "ද", img: "https://cdn-icons-png.flaticon.com/512/2921/2921822.png" },
+            { char: "ධ", img: "https://cdn-icons-png.flaticon.com/512/2921/2921949.png" },
+            { char: "න", img: "https://cdn-icons-png.flaticon.com/512/235/235384.png" },
+            { char: "ප", img: "https://cdn-icons-png.flaticon.com/512/2232/2232688.png" },
+            { char: "ඵ", img: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png" },
+            { char: "බ", img: "https://cdn-icons-png.flaticon.com/512/3014/3014288.png" },
+            { char: "භ", img: "https://cdn-icons-png.flaticon.com/512/2972/2972531.png" },
+            { char: "ම", img: "https://cdn-icons-png.flaticon.com/512/3050/3050525.png" },
+            { char: "ය", img: "https://cdn-icons-png.flaticon.com/512/2972/2972531.png" },
+            { char: "ර", img: "https://cdn-icons-png.flaticon.com/512/1080/1080985.png" },
+            { char: "ල", img: "https://cdn-icons-png.flaticon.com/512/235/235384.png" },
+            { char: "ව", img: "https://cdn-icons-png.flaticon.com/512/3050/3050525.png" },
+            { char: "ශ", img: "https://cdn-icons-png.flaticon.com/512/616/616412.png" },
+            { char: "ෂ", img: "https://cdn-icons-png.flaticon.com/512/616/616412.png" },
+            { char: "ස", img: "https://cdn-icons-png.flaticon.com/512/616/616412.png" },
+            { char: "හ", img: "https://cdn-icons-png.flaticon.com/512/375/375238.png" },
+            { char: "ළ", img: "https://cdn-icons-png.flaticon.com/512/235/235384.png" },
+            { char: "ෆ", img: "https://cdn-icons-png.flaticon.com/512/1170/1170576.png" },
+
+            // English Alphabet A-Z
+            { char: "A", img: "https://cdn-icons-png.flaticon.com/512/415/415733.png" },
+            { char: "B", img: "https://cdn-icons-png.flaticon.com/512/3014/3014288.png" },
+            { char: "C", img: "https://cdn-icons-png.flaticon.com/512/616/616430.png" },
+            { char: "D", img: "https://cdn-icons-png.flaticon.com/512/616/616408.png" },
+            { char: "E", img: "https://cdn-icons-png.flaticon.com/512/375/375238.png" },
+            { char: "F", img: "https://cdn-icons-png.flaticon.com/512/3050/3050525.png" },
+            { char: "G", img: "https://cdn-icons-png.flaticon.com/512/1998/1998610.png" },
+            { char: "H", img: "https://cdn-icons-png.flaticon.com/512/1042/1042339.png" },
+            { char: "I", img: "https://cdn-icons-png.flaticon.com/512/2909/2909761.png" },
+            { char: "J", img: "https://cdn-icons-png.flaticon.com/512/2491/2491921.png" },
+            { char: "K", img: "https://cdn-icons-png.flaticon.com/512/3199/3199830.png" },
+            { char: "L", img: "https://cdn-icons-png.flaticon.com/512/616/616412.png" },
+            { char: "M", img: "https://cdn-icons-png.flaticon.com/512/235/235384.png" },
+            { char: "N", img: "https://cdn-icons-png.flaticon.com/512/3594/3594163.png" },
+            { char: "O", img: "https://cdn-icons-png.flaticon.com/512/1080/1080985.png" },
+            { char: "P", img: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png" },
+            { char: "Q", img: "https://cdn-icons-png.flaticon.com/512/3345/3345391.png" },
+            { char: "R", img: "https://cdn-icons-png.flaticon.com/512/1791/1791330.png" },
+            { char: "S", img: "https://cdn-icons-png.flaticon.com/512/869/869869.png" },
+            { char: "T", img: "https://cdn-icons-png.flaticon.com/512/489/489969.png" },
+            { char: "U", img: "https://cdn-icons-png.flaticon.com/512/1042/1042339.png" },
+            { char: "V", img: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png" },
+            { char: "W", img: "https://cdn-icons-png.flaticon.com/512/831/831317.png" },
+            { char: "X", img: "https://cdn-icons-png.flaticon.com/512/1170/1170576.png" },
+            { char: "Y", img: "https://cdn-icons-png.flaticon.com/512/2838/2838779.png" },
+            { char: "Z", img: "https://cdn-icons-png.flaticon.com/512/2921/2921822.png" }
+        ];
+
+        let currentIndex = 0;
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+        let color = "#ff007f";
+
+        function initApp() {
+            const select = document.getElementById('letterSelect');
+            select.innerHTML = "";
+            items.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.innerText = `අකුර: ${item.char}`;
+                select.appendChild(opt);
+            });
+            loadLetter(0);
+        }
+        window.initApp = initApp;
+
+        function loadLetter(index) {
+            currentIndex = parseInt(index);
+            document.getElementById('letterSelect').value = currentIndex;
+            document.getElementById('bgWatermark').style.backgroundImage = `url('${items[currentIndex].img}')`;
+            clearCanvas();
+        }
+
+        function drawGuideText() {
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "bold 170px 'Comic Sans MS', sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(items[currentIndex].char, canvas.width / 2, canvas.height / 2);
+        }
+
+        function changeLetter(index) { loadLetter(index); }
+        function nextLetter() { if (currentIndex < items.length - 1) loadLetter(currentIndex + 1); }
+        function prevLetter() { if (currentIndex > 0) loadLetter(currentIndex - 1); }
+
+        function setColor(c) { color = c; }
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); drawGuideText(); }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+            }
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        function startPosition(e) { e.preventDefault(); painting = true; draw(e); }
+        function finishedPosition(e) { e.preventDefault(); painting = false; ctx.beginPath(); }
+        function draw(e) {
+            if (!painting) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.lineWidth = 14;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = color;
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', finishedPosition);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', startPosition, { passive: false });
+        canvas.addEventListener('touchend', finishedPosition, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+    </script>
+
+</body>
+</html>
