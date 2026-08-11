@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>අකුරු සෙල්ලම - පෙරපාසල</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif; }
+        
+        body { 
+            background-color: #0f172a; 
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+            color: white; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        
+        header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { color: #38bdf8; }
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+        .game-card { background: #1e293b; border: 3px solid #38bdf8; border-radius: 20px; padding: 25px; text-align: center; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .target-letter { font-size: 4rem; color: #ff007f; margin: 15px 0; font-weight: bold; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .option-btn { background: #334155; border: 2px solid #fff; border-radius: 15px; padding: 15px; font-size: 2.5rem; cursor: pointer; transition: transform 0.2s; }
+        .option-btn:active { transform: scale(0.9); }
+
+        #msg { margin-top: 15px; font-size: 1.2rem; font-weight: bold; height: 30px; }
+        .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.2rem; color: #94a3b8; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">පූරණය වෙමින්...</div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        <header>
+            <h2>🧩 අකුරු සෙල්ලම</h2>
+            <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+        </header>
+
+        <div class="game-card">
+            <p>මේ අකුරට ගැලපෙන පින්තූරය තෝරන්න:</p>
+            <div id="targetLetter" class="target-letter">අ</div>
+
+            <div id="optionsGrid" class="options-grid"></div>
+
+            <div id="msg"></div>
+        </div>
+    </div>
+
+    <!-- Firebase Authentication & Protection -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003004594",
+            appId: "1:635003004594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let appStarted = false;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('pageContent').classList.remove('hidden');
+                
+                if (!appStarted) {
+                    appStarted = true;
+                    initGame();
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // නිවැරදි සිංහල අකුරු සහ පින්තූර 25ක ලැයිස්තුව
+        const questions = [
+            { letter: 'අ', correct: '🐘', options: ['🐘', '☀️', '⏰', '🍌'] }, // අලියා
+            { letter: 'ආ', correct: '👵', options: ['🍌', '👵', '🚗', '🐱'] }, // ආච්චි
+            { letter: 'ඉ', correct: '☀️', options: ['⏰', '⚽', '☀️', '🐘'] }, // ඉර
+            { letter: 'ඊ', correct: '🏹', options: ['🏹', '🍌', '🚗', '⛏️'] }, // ඊතලය
+            { letter: 'උ', correct: '⛏️', options: ['⛏️', '🍌', '🚗', '⏰'] }, // උදැල්ල
+            { letter: 'ඌ', correct: '🐖', options: ['☀️', '🐖', '⚽', '🐐'] }, // ඌරා
+            { letter: 'එ', correct: '🐐', options: ['☀️', '⚽', '🍌', '🐐'] }, // එළුවා
+            { letter: 'ඒ', correct: '💡', options: ['💡', '🐘', '👵', '🚗'] }, // ඒලයිට් / බල්බ්
+            { letter: 'ඔ', correct: '⛵', options: ['⛵', '🍌', '⏰', '⛏️'] }, // ඔරුව
+            { letter: 'ක', correct: '🍌', options: ['🍌', '🐘', '☀️', '⚽'] }, // කෙසෙල්
+            { letter: 'ග', correct: '🔥', options: ['🐱', '🔥', '🚗', '🏹'] }, // ගින්දර
+            { letter: 'ච', correct: '🌙', options: ['🌙', '☀️', '🐘', '🍌'] }, // චන්ද්‍රයා
+            { letter: 'ට', correct: '⏰', options: ['⚽', '⏰', '🚗', '💡'] }, // ටයිමර්/ඔරලෝසුව
+            { letter: 'ත', correct: '🌟', options: ['🌟', '👵', '⛏️', '🐖'] }, // තාරකාව
+            { letter: 'ද', correct: '🦷', options: ['🦷', '🚢', '🦋', '⚽'] }, // දත
+            { letter: 'න', correct: '🚢', options: ['🚢', '🐱', '🔥', '🐘'] }, // නැව
+            { letter: 'ප', correct: '⚽', options: ['⚽', '🍌', '☀️', '⏰'] }, // පන්දුව
+            { letter: 'බ', correct: '🐶', options: ['🐶', '🚗', '🌙', '🐐'] }, // බල්ලා
+            { letter: 'ම', correct: '🐟', options: ['🐟', '🚗', '🌙', '🐐'] }, // මාලුවා
+            { letter: 'ය', correct: '🔑', options: ['🔑', '🐘', '🌟', '💡'] }, // යතුර
+            { letter: 'ර', correct: '🚗', options: ['🚗', '🐘', '🌟', '💡'] }, // රථය
+            { letter: 'ල', correct: '✉️', options: ['✉️', '🐒', '🦋', '📱'] }, // ලියුම
+            { letter: 'ව', correct: '🐒', options: ['🐒', '🐘', '🚗', '⚽'] }, // වඳුරා
+            { letter: 'ස', correct: '🦋', options: ['🦋', '🐕', '🐟', '🚢'] }, // සමනලයා
+            { letter: 'හ', correct: '🐇', options: ['🐇', '✉️', '🔑', '🍌'] }, // හාවා
+            { letter: 'ෆ', correct: '📱', options: ['📱', '🚗', '🌙', '⚽'] }  // ෆෝන් එක
+        ];
+
+        let currentQIndex = 0;
+
+        function initGame() {
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const msg = document.getElementById('msg');
+            msg.innerText = '';
+            
+            const q = questions[currentQIndex];
+            document.getElementById('targetLetter').innerText = q.letter;
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            // Options Randomize කර පෙන්වීම
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt === q.correct);
+                grid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect) {
+            const msg = document.getElementById('msg');
+            if(isCorrect) {
+                msg.style.color = '#00e676';
+                msg.innerText = "නිවැරදියි! හරිම ෂෝක්! 🎉";
+                setTimeout(() => {
+                    currentQIndex = (currentQIndex + 1) % questions.length;
+                    loadQuestion();
+                }, 1200);
+            } else {
+                msg.style.color = '#ef4444';
+                msg.innerText = "ආයෙත් උත්සාහ කරන්න! ❌";
+            }
+        }
+    </script>
+</body>
+</html>
