@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>කොළ කපා මල් හදමු - පෙරපාසල</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif; }
+        
+        body { 
+            background-color: #0f172a; 
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+            color: white; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+
+        header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { color: #ff007f; }
+        
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        
+        .craft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; }
+        .craft-card { 
+            background: #1e293b; border: 3px solid #ff007f; border-radius: 15px; padding: 15px; 
+            text-align: center; cursor: pointer; text-decoration: none; color: white; transition: transform 0.2s; 
+            touch-action: manipulation;
+        }
+        .craft-card:active { transform: scale(0.95); }
+        .craft-img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
+        .craft-title { font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
+        
+        .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.2rem; color: #94a3b8; }
+        .hidden { display: none !important; }
+
+        /* Logout Button එක */
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">පූරණය වෙමින්...</div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        <header>
+            <h2>✂️ කොළ කපා මල් හදමු</h2>
+            <div style="display: flex; gap: 10px;">
+                <button id="logoutBtn" class="logout-btn">🚪 ඉවත්වන්න</button>
+                <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+            </div>
+        </header>
+
+        <p style="margin-bottom: 15px; text-align: center;">ඔයා හදන්න කැමති නිර්මාණය තෝරන්න:</p>
+
+        <div class="craft-grid">
+            <a href="craft_flower1.html" class="craft-card" data-href="craft_flower1.html">
+                <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=300" class="craft-img" alt="කඩදාසි මල">
+                <div class="craft-title">පාට කඩදාසි මල 🌸</div>
+            </a>
+
+            <a href="craft_butterfly.html" class="craft-card" data-href="craft_butterfly.html">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300" class="craft-img" alt="සමනලයා">
+                <div class="craft-title">ලස්සන සමනලයා 🦋</div>
+            </a>
+
+            <a href="craft_boat.html" class="craft-card" data-href="craft_boat.html">
+                <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300" class="craft-img" alt="ඔරුව">
+                <div class="craft-title">පුංචි කඩදාසි ඔරුව ⛵</div>
+            </a>
+
+            <a href="craft_star.html" class="craft-card" data-href="craft_star.html">
+                <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" class="craft-img" alt="තාරකාව">
+                <div class="craft-title">කඩදාසි තාරකාව 🌟</div>
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003594",
+            appId: "1:635003594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const pageContent = document.getElementById('pageContent');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Auth state listener - FIX 1: Directly show/hide without extra flag
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User logged in - show page
+                loadingScreen.classList.add('hidden');
+                pageContent.classList.remove('hidden');
+                console.log("✅ User logged in:", user.email);
+            } else {
+                // User not logged in - redirect to login
+                window.location.href = "index.html";
+            }
+        });
+
+        // FIX 2: Logout functionality
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                // Redirect to login page after logout
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Logout error:", error);
+                alert("Logout වීමේදී දෝෂයක් ඇති විය. කරුණාකර නැවත උත්සාහ කරන්න.");
+            }
+        });
+
+        // FIX 3: Mobile touch events - clean approach
+        document.querySelectorAll('.craft-card').forEach(card => {
+            // Remove any existing listeners to prevent duplicates
+            card.removeEventListener('touchend', handleTouch);
+            card.addEventListener('touchend', handleTouch, { passive: true });
+        });
+
+        function handleTouch(e) {
+            const card = e.currentTarget;
+            const href = card.getAttribute('data-href') || card.getAttribute('href');
+            if (href) {
+                window.location.href = href;
+            }
+        }
+
+        // FIX 4: Prevent double navigation on click + touch
+        document.querySelectorAll('.craft-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // If it's a touch device, click might fire after touch - prevent default
+                if ('ontouchstart' in window) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // FIX 5: Session persistence - set auth state persistence
+        // Firebase default is 'local' which persists across browser sessions
+        // You can also set: setPersistence(auth, browserLocalPersistence)
+        
+        console.log("✅ App initialized successfully");
+    </script>
+</body>
+</html>
