@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>කොළ කපා මල් හදමු - පෙරපාසල</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif; }
+        
+        /* Consistency සඳහා Watermark Background එක */
+        body { 
+            background-color: #0f172a; 
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+            color: white; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+
+        header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { color: #ff007f; }
+        
+        /* Back Button -> sinhala_pre.html */
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        
+        .craft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; }
+        .craft-card { 
+            background: #1e293b; border: 3px solid #ff007f; border-radius: 15px; padding: 15px; 
+            text-align: center; cursor: pointer; text-decoration: none; color: white; transition: transform 0.2s; 
+            touch-action: manipulation;
+        }
+        .craft-card:active { transform: scale(0.95); }
+        .craft-img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
+        .craft-title { font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
+        
+        .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.2rem; color: #94a3b8; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">පූරණය වෙමින්...</div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        <header>
+            <h2>✂️ කොළ කපා මල් හදමු</h2>
+            <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+        </header>
+
+        <p style="margin-bottom: 15px; text-align: center;">ඔයා හදන්න කැමති නිර්මාණය තෝරන්න:</p>
+
+        <!-- සියලුම නිර්මාණ 4 මෙතන සම්පූර්ණයෙන්ම ඇත -->
+        <div class="craft-grid">
+            <a href="craft_flower1.html" class="craft-card">
+                <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=300" class="craft-img" alt="කඩදාසි මල">
+                <div class="craft-title">පාට කඩදාසි මල 🌸</div>
+            </a>
+
+            <a href="craft_butterfly.html" class="craft-card">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300" class="craft-img" alt="සමනලයා">
+                <div class="craft-title">ලස්සන සමනලයා 🦋</div>
+            </a>
+
+            <a href="craft_boat.html" class="craft-card">
+                <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300" class="craft-img" alt="ඔරුව">
+                <div class="craft-title">පුංචි කඩදාසි ඔරුව ⛵</div>
+            </a>
+
+            <a href="craft_star.html" class="craft-card">
+                <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" class="craft-img" alt="තාරකාව">
+                <div class="craft-title">කඩදාසි තාරකාව 🌟</div>
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        // Ghost-click fix එක සඳහා touchend event එකට preventDefault යෙදීම
+        document.querySelectorAll('.craft-card').forEach(card => {
+            card.addEventListener('touchend', (e) => { 
+                e.preventDefault(); 
+                window.location.href = card.getAttribute('href'); 
+            }, { passive: false });
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003004594",
+            appId: "1:635003004594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // App එක duplicate-initialize වීම වැළැක්වීමේ Flag එක
+        let appStarted = false;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (!appStarted) {
+                    appStarted = true;
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('pageContent').classList.remove('hidden');
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>
