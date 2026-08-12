@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Learning - ඉංග්‍රීසි ඉගෙනගනිමු</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; }
+
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+            color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        header { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { color: #ff007f; }
+
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; margin-bottom: 20px; }
+        .main-card {
+            background: #1e293b; border: 3px solid #ff007f; border-radius: 15px; padding: 20px;
+            text-align: center; cursor: pointer; color: white; transition: transform 0.2s; touch-action: manipulation;
+        }
+        .main-card:active { transform: scale(0.95); }
+        .main-card-title { font-size: 1.1rem; font-weight: bold; color: #38bdf8; margin-top: 10px; }
+        .main-icon { font-size: 2.5rem; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; padding: 15px; z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #1e293b; background-repeat: no-repeat; background-position: center; background-size: cover;
+            position: relative; border: 3px solid #00e676; border-radius: 20px;
+            max-width: 550px; width: 100%; padding: 20px; text-align: center; max-height: 85vh; overflow-y: auto; z-index: 1;
+        }
+        .modal-content::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.88); border-radius: 17px; z-index: -1;
+        }
+
+        .close-btn { background: #ff007f; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; float: right; }
+
+        .alphabet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
+        .letter-btn {
+            background: #0284c7; color: white; border: 2px solid #38bdf8; font-size: 1.5rem; font-weight: bold;
+            padding: 12px; border-radius: 12px; cursor: pointer; text-align: center;
+        }
+        .letter-btn:active { background: #ff007f; }
+
+        .word-list { text-align: left; margin-top: 15px; }
+        .word-item { background: #334155; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 1.1rem; }
+        .highlight { color: #ff007f; font-weight: bold; font-size: 1.2rem; }
+
+        .convo-item { background: #334155; border-left: 4px solid #00e676; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 6px; }
+        .convo-en { color: #38bdf8; font-weight: bold; font-size: 1.05rem; }
+        .convo-si-pron { color: #facc15; font-size: 0.95rem; margin: 3px 0; }
+        .convo-si-meaning { color: #f1f5f9; font-size: 0.95rem; }
+
+        .image-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .img-card { background: #0f172a; border: 2px solid #38bdf8; border-radius: 10px; padding: 8px; text-align: center; }
+        .img-card img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; margin-bottom: 5px; }
+
+        .loading { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; min-height: 100vh; color: #94a3b8; text-align: center; padding: 20px; }
+        .retry-btn { background: #ff007f; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">
+        <span id="loadingText">පූරණය වෙමින්...</span>
+    </div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        <header>
+            <h2>🔤 English Learning</h2>
+            <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+        </header>
+
+        <div class="main-grid">
+            <div class="main-card" onclick="openAlphabetModal()">
+                <div class="main-icon">🔤</div>
+                <div class="main-card-title">ඉංග්‍රීසි හෝඩිය (A-Z)</div>
+            </div>
+
+            <div class="main-card" onclick="openConvoModal()">
+                <div class="main-icon">💬</div>
+                <div class="main-card-title">එදිනෙදා සංවාද (50)</div>
+            </div>
+
+            <div class="main-card" onclick="openImagesSelectModal()" style="grid-column: span 2;">
+                <div class="main-icon">🖼️</div>
+                <div class="main-card-title">රූප සහ වචන (A-Z Flashcards)</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="appModal" class="modal">
+        <div id="modalContainer" class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✖ වසන්න</button>
+            <h3 id="modalTitle" style="color:#00e676; margin-bottom:15px; text-align:left;"></h3>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const alphabetData = {
+            A: {
+                words: ["Apple", "Ant", "Airplane", "Alligator", "Anchor"],
+                images: [
+                    { name: "<span class='highlight'>A</span>pple", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300" },
+                    { name: "<span class='highlight'>A</span>nt", img: "https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?w=300" },
+                    { name: "<span class='highlight'>A</span>irplane", img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300" },
+                    { name: "<span class='highlight'>A</span>lligator", img: "https://images.unsplash.com/photo-1525382455947-f319bc05fb35?w=300" },
+                    { name: "<span class='highlight'>A</span>nchor", img: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=300" }
+                ],
+                bg: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600"
+            },
+            B: {
+                words: ["Ball", "Banana", "Bear", "Butterfly", "Bus"],
+                images: [
+                    { name: "<span class='highlight'>B</span>all", img: "https://images.unsplash.com/photo-1614632537190-23e4146777db?w=300" },
+                    { name: "<span class='highlight'>B</span>anana", img: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300" },
+                    { name: "<span class='highlight'>B</span>ear", img: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?w=300" },
+                    { name: "<span class='highlight'>B</span>utterfly", img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300" },
+                    { name: "<span class='highlight'>B</span>us", img: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=300" }
+                ],
+                bg: "https://images.unsplash.com/photo-1614632537190-23e4146777db?w=600"
+            }
+        };
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        letters.forEach(l => {
+            if(!alphabetData[l]) {
+                alphabetData[l] = {
+                    words: [`${l}at`, `${l}en`, `${l}ion`, `${l}un`, `${l}oo`],
+                    images: Array(5).fill({ name: `<span class='highlight'>${l}</span>item`, img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" }),
+                    bg: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600"
+                }
+            }
+        });
+
+        const conversations = [
+            { en: "Good morning!", pron: "ගුඩ් මෝනින්ග්", si: "සුබ උදෑසනක්!" },
+            { en: "How are you?", pron: "හවු ආ යූ?", si: "ඔයාට කොහොමද?" },
+            { en: "I am fine.", pron: "අයි ඇම් ෆයින්", si: "මට සනීපයි / හොඳින් ඉන්නවා." },
+            { en: "What is your name?", pron: "වොට් ඉස් යෝ නේම්?", si: "ඔයාගේ නම මොකක්ද?" },
+            { en: "My name is Nimal.", pron: "මයි නේම් ඉස් නිමල්", si: "මගේ නම නිමල්." },
+            { en: "Nice to meet you.", pron: "නයිස් ටු මීට් යූ", si: "ඔයාව හමුවීම සතුටක්." },
+            { en: "Thank you very much.", pron: "තෑන්ක් යූ වේරි මච්", si: "බොහෝම ස්තූතියි." },
+            { en: "You are welcome.", pron: "යූ ආ වෙල්කම්", si: "සාදරයෙන් පිළිගන්නවා." },
+            { en: "See you later.", pron: "සී යූ ලේටර්", si: "පසුව හමුවෙමු." },
+            { en: "Goodbye!", pron: "ගුඩ්බායි", si: "ගිහින් එන්නම්!" },
+            { en: "Where are you going?", pron: "වෙයා ආ යූ ගෝයින්ග්?", si: "ඔයා කොහෙද යන්නේ?" },
+            { en: "I am going home.", pron: "අයි ඇම් ගෝයින්ග් හෝම්", si: "මම ගෙදර යනවා." },
+            { en: "What are you doing?", pron: "වොට් ආ යූ ඩූයින්ග්?", si: "ඔයා මොකද කරන්නේ?" },
+            { en: "I am studying.", pron: "අයි ඇම් ස්ටඩීයින්ග්", si: "මම පාඩම් කරනවා." },
+            { en: "Can you help me?", pron: "කෑන් යූ හෙල්ප් මී?", si: "මට උදව් කරන්න පුළුවන්ද?" },
+            { en: "Yes, of course.", pron: "යෙස්, ඔෆ් කෝස්", si: "ඔව්, අනිවාර්යයෙන්ම." },
+            { en: "I don't know.", pron: "අයි ඩොන්ට් නෝ", si: "මම දන්නේ නැහැ." },
+            { en: "Please sit down.", pron: "ප්ලීස් සිට් බවුන්", si: "කරුණාකර වාඩිවෙන්න." },
+            { en: "Come here.", pron: "කම් හියර්", si: "මෙහෙට එන්න." },
+            { en: "Wait a minute.", pron: "වේට් අ මිනිට්", si: "විනාඩියක් ඉන්න." },
+            { en: "I am hungry.", pron: "අයි ඇම් හන්ග්‍රි", si: "මට බඩගිනියි." },
+            { en: "I am thirsty.", pron: "අයි ඇම් තර්ස්ටි", si: "මට තිබහයි." },
+            { en: "What time is it?", pron: "වොට් ටයිම් ඉස් ඉට්?", si: "වෙලාව කීයද?" },
+            { en: "It is 8 o'clock.", pron: "ඉට් ඉස් එයිට් ඕ ක්ලොක්", si: "දැන් වේලාව 8යි." },
+            { en: "How much is this?", pron: "හවු මච් ඉස් දිස්?", si: "මේක කීයද?" },
+            { en: "I like this.", pron: "අයි ලයික් දිස්", si: "මම මේකට කැමතියි." },
+            { en: "I am sorry.", pron: "අයි ඇම් සොරි", si: "මට කණගාටුයි / සමාවෙන්න." },
+            { en: "Don't worry.", pron: "ඩොන්ට් වරි", si: "කණගාටු වෙන්න එපා." },
+            { en: "Let's go!", pron: "ලෙට්ස් ගෝ", si: "අපි යමු!" },
+            { en: "Be careful.", pron: "බී කෙයාෆුල්", si: "පරිස්සම් වෙන්න." },
+            { en: "Have a nice day!", pron: "හැව් අ නයිස් ඩේ", si: "සුබ දවසක්!" },
+            { en: "Where do you live?", pron: "වෙයා ඩූ යූ ලිව්?", si: "ඔයා පදිංචි වෙලා ඉන්නේ කොහෙද?" },
+            { en: "I live in Colombo.", pron: "අයි ලිව් ඉන් කොළඹ", si: "මම ජීවත් වෙන්නේ කොළඹ." },
+            { en: "Open the door.", pron: "ඕපන් ද ඩෝ", si: "දොර අරින්න." },
+            { en: "Close the window.", pron: "ක්ලෝස් ද වින්ඩෝ", si: "ජනේලය වහන්න." },
+            { en: "Speak slowly.", pron: "ස්පීක් ස්ලෝලි", si: "හෙමින් කතා කරන්න." },
+            { en: "I understand.", pron: "අයි අන්ඩර්ස්ටෑන්ඩ්", si: "මට තේරෙනවා." },
+            { en: "I don't understand.", pron: "අයි ඩොන්ට් අන්ඩර්ස්ටෑන්ඩ්", si: "මට තේරෙන්නේ නැහැ." },
+            { en: "What happened?", pron: "වොට් හැපන්ඩ්?", si: "මොකද වුණේ?" },
+            { en: "Nothing happened.", pron: "නතින්ග් හැපන්ඩ්", si: "මුකුත් වුණේ නැහැ." },
+            { en: "Are you ready?", pron: "ආ යූ රෙඩි?", si: "ඔයා ලෑස්තිද?" },
+            { en: "Yes, I am ready.", pron: "යෙස්, අයි ඇම් රෙඩි", si: "ඔව්, මම ලෑස්තියි." },
+            { en: "Call me later.", pron: "කෝල් මී ලේටර්", si: "මට පස්සේ කෝල් කරන්න." },
+            { en: "Good night!", pron: "ගුඩ් නයිට්", si: "සුබ රාත්‍රියක්!" },
+            { en: "Happy birthday!", pron: "හැපි බර්ත්ඩේ", si: "සුබ උපන්දිනක්!" },
+            { en: "Congratulations!", pron: "කන්ග්‍රැචුලේෂන්ස්", si: "සුබ පැතුම්!" },
+            { en: "Excuse me.", pron: "එක්ස්කියුස් මී", si: "සමාවෙන්න (අවධානය ගැනීමට)." },
+            { en: "Take care.", pron: "ටේක් කෙයා", si: "පරිස්සමෙන් ඉන්න." },
+            { en: "Listen to me.", pron: "ලිසන් ටු මී", si: "මට ඇහුම්කන් දෙන්න." },
+            { en: "Well done!", pron: "වෙල් ඩන්", si: "ඉතා හොඳයි / ගොඩක් හොඳට කළා!" }
+        ];
+
+        window.openModal = function(title, htmlContent, bgUrl = "") {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerHTML = htmlContent;
+            document.getElementById('modalContainer').style.backgroundImage = bgUrl ? `url('${bgUrl}')` : 'none';
+            document.getElementById('appModal').style.display = 'flex';
+        };
+
+        window.closeModal = function() {
+            document.getElementById('appModal').style.display = 'none';
+        };
+
+        window.openAlphabetModal = function() {
+            let gridHtml = `<p style="text-align:center;">අකුරක් Touch කර එම අකුරෙන් පටන්ගන්නා වචන 5 බලන්න:</p><div class="alphabet-grid">`;
+            letters.forEach(l => {
+                gridHtml += `<div class="letter-btn" onclick="showLetterWords('${l}')">${l}</div>`;
+            });
+            gridHtml += `</div>`;
+            openModal("🔤 ඉංග්‍රීසි හෝඩිය (A-Z)", gridHtml);
+        };
+
+        window.showLetterWords = function(letter) {
+            const data = alphabetData[letter];
+            let html = `<h2 style="color:#facc15; text-align:center; font-size:2rem; margin-bottom:10px;">Letter ${letter}</h2><div class="word-list">`;
+            data.words.forEach(w => {
+                let highlighted = w.replace(new RegExp(`^${letter}`, 'i'), `<span class="highlight">${letter}</span>`);
+                html += `<div class="word-item">👉 ${highlighted}</div>`;
+            });
+            html += `</div><button class="close-btn" style="float:none; margin-top:15px;" onclick="openAlphabetModal()">⬅ ආපසු A-Z වලට</button>`;
+            openModal(`'${letter}' අකුරෙන් පටන්ගන්නා වචන 5`, html, data.bg);
+        };
+
+        window.openConvoModal = function() {
+            let html = `<p style="margin-bottom:10px;">එදිනෙදා භාවිත වන සංවාද 50ක් මෙන්න:</p>`;
+            conversations.forEach((c, index) => {
+                html += `
+                <div class="convo-item">
+                    <div class="convo-en">${index + 1}. ${c.en}</div>
+                    <div class="convo-si-pron">🗣️ ${c.pron}</div>
+                    <div class="convo-si-meaning">💡 ${c.si}</div>
+                </div>`;
+            });
+            openModal("💬 එදිනෙදා භාවිත වන සංවාද 50", html, "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=600");
+        };
+
+        window.openImagesSelectModal = function() {
+            let gridHtml = `<p style="text-align:center;">රූප සහ වචන බලන්න අකුරක් තෝරන්න:</p><div class="alphabet-grid">`;
+            letters.forEach(l => {
+                gridHtml += `<div class="letter-btn" style="background:#059669;" onclick="showLetterImages('${l}')">${l}</div>`;
+            });
+            gridHtml += `</div>`;
+            openModal("🖼️ රූප සහ වචන (A-Z Flashcards)", gridHtml);
+        };
+
+        window.showLetterImages = function(letter) {
+            const data = alphabetData[letter];
+            let html = `<h2 style="color:#38bdf8; text-align:center; margin-bottom:10px;">Letter ${letter} Flashcards</h2><div class="image-card-grid">`;
+            data.images.forEach(imgObj => {
+                html += `
+                <div class="img-card">
+                    <img src="${imgObj.img}">
+                    <div style="font-weight:bold; font-size:1.1rem; color:white;">${imgObj.name}</div>
+                </div>`;
+            });
+            html += `</div><button class="close-btn" style="float:none; margin-top:15px;" onclick="openImagesSelectModal()">⬅ ආපසු තෝරා ගැනීමට</button>`;
+            openModal(`Letter '${letter}' රූප 5`, html, data.bg);
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003004594",
+            appId: "1:635003004594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        let appStarted = false;
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingText = document.getElementById('loadingText');
+        const pageContent = document.getElementById('pageContent');
+
+        function showContent() {
+            if (appStarted) return;
+            appStarted = true;
+            loadingScreen.classList.add('hidden');
+            pageContent.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            loadingText.textContent = message;
+            const btn = document.createElement('button');
+            btn.textContent = "නැවත උත්සාහ කරන්න";
+            btn.className = 'retry-btn';
+            btn.onclick = () => window.location.reload();
+            loadingScreen.appendChild(btn);
+        }
+
+        const authTimeout = setTimeout(() => {
+            if (!appStarted) {
+                showError("සම්බන්ධතාවය පරීක්ෂා කරන්න. ප්‍රවේශ වීමට නොහැකි විය.");
+            }
+        }, 10000);
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            onAuthStateChanged(auth, (user) => {
+                clearTimeout(authTimeout);
+                if (user) {
+                    showContent();
+                } else {
+                    window.location.href = "index.html";
+                }
+            });
+        } catch (err) {
+            clearTimeout(authTimeout);
+            showError("පූරණය කිරීමේදී දෝෂයක් ඇති විය.");
+        }
+    </script>
+</body>
+</html>
