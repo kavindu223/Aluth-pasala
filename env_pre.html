@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>පරිසරය - Environment Learning</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chilanka', sans-serif; }
+
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+            color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        header { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { color: #00e676; }
+
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; max-width: 600px; margin-bottom: 20px; }
+        .category-card {
+            background: #1e293b; border: 3px solid #00e676; border-radius: 15px; padding: 15px;
+            display: flex; align-items: center; gap: 15px; cursor: pointer; color: white; transition: transform 0.2s; touch-action: manipulation;
+        }
+        .category-card:active { transform: scale(0.97); }
+        .category-icon { font-size: 2.5rem; background: #0f172a; padding: 10px; border-radius: 12px; }
+        .category-info h3 { color: #38bdf8; font-size: 1.2rem; margin-bottom: 3px; }
+        .category-info p { color: #cbd5e1; font-size: 0.9rem; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; padding: 15px; z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #1e293b; position: relative; border: 3px solid #ff007f; border-radius: 20px;
+            max-width: 550px; width: 100%; padding: 20px; text-align: center; max-height: 85vh; overflow-y: auto;
+        }
+
+        .close-btn { background: #ff007f; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; float: right; }
+
+        .item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .item-card { background: #0f172a; border: 2px solid #38bdf8; border-radius: 12px; padding: 10px; text-align: center; }
+        .item-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
+        .item-name-si { font-weight: bold; font-size: 1.1rem; color: #facc15; }
+        .item-name-en { font-size: 0.9rem; color: #38bdf8; }
+
+        .loading { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; min-height: 100vh; color: #94a3b8; text-align: center; padding: 20px; }
+        .retry-btn { background: #ff007f; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">
+        <span id="loadingText">පූරණය වෙමින්...</span>
+    </div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        <header>
+            <h2>🌱 අපේ පරිසරය</h2>
+            <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+        </header>
+
+        <div class="main-grid">
+            <div class="category-card" onclick="openCategoryModal('animals')">
+                <div class="category-icon">🐶</div>
+                <div class="category-info">
+                    <h3>අප අවට සතුන්</h3>
+                    <p>බල්ලා, පූසා, අලියා, කුරුල්ලා ඇතුළු සතුන්</p>
+                </div>
+            </div>
+
+            <div class="category-card" onclick="openCategoryModal('plants')" style="border-color:#facc15;">
+                <div class="category-icon">🌸</div>
+                <div class="category-info">
+                    <h3 style="color:#facc15;">ශාක සහ මල්</h3>
+                    <p>ගස්, මල්, කොළ සහ ගෙඩි</p>
+                </div>
+            </div>
+
+            <div class="category-card" onclick="openCategoryModal('nature')" style="border-color:#38bdf8;">
+                <div class="category-icon">☀️</div>
+                <div class="category-info">
+                    <h3 style="color:#38bdf8;">ස්වාභාවික පරිසරය</h3>
+                    <p>ඉර, හඳ, තරු, වැස්ස, ගඟ</p>
+                </div>
+            </div>
+
+            <div class="category-card" onclick="openCategoryModal('body')" style="border-color:#ff007f;">
+                <div class="category-icon">👁️</div>
+                <div class="category-info">
+                    <h3 style="color:#ff007f;">අපේ ශරීරය</h3>
+                    <p>ඇස, කන, නාසය, අත, කකුල</p>
+                </div>
+            </div>
+
+            <div class="category-card" onclick="openCategoryModal('habits')" style="border-color:#a855f7;">
+                <div class="category-icon">🧹</div>
+                <div class="category-info">
+                    <h3 style="color:#a855f7;">යහපත් පුරුදු</h3>
+                    <p>පරිසරය පිරිසිදුව තබාගැනීම</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="appModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✖ වසන්න</button>
+            <h3 id="modalTitle" style="color:#00e676; margin-bottom:15px; text-align:left;"></h3>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const envData = {
+            animals: {
+                title: "🐶 අප අවට සතුන්",
+                items: [
+                    { si: "බල්ලා", en: "Dog", img: "https://images.unsplash.com/photo-1552053831-71594a27632d?w=300" },
+                    { si: "පූසා", en: "Cat", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300" },
+                    { si: "අලියා", en: "Elephant", img: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=300" },
+                    { si: "කුරුල්ලා", en: "Bird", img: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=300" },
+                    { si: " සමනලයා", en: "Butterfly", img: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300" },
+                    { si: "මාළුවා", en: "Fish", img: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=300" }
+                ]
+            },
+            plants: {
+                title: "🌸 ශාක සහ මල්",
+                items: [
+                    { si: "ගස", en: "Tree", img: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=300" },
+                    { si: "මල", en: "Flower", img: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=300" },
+                    { si: "කොළය", en: "Leaf", img: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=300" },
+                    { si: "ගෙඩිය / පළතුර", en: "Fruit", img: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300" },
+                    { si: "මුල", en: "Root", img: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=300" },
+                    { si: "තණකොළ", en: "Grass", img: "https://images.unsplash.com/photo-1533460004989-acf017c26313?w=300" }
+                ]
+            },
+            nature: {
+                title: "☀️ ස්වාභාවික පරිසරය",
+                items: [
+                    { si: "ඉර", en: "Sun", img: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=300" },
+                    { si: "හඳ", en: "Moon", img: "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?w=300" },
+                    { si: "තරු", en: "Stars", img: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=300" },
+                    { si: "වැස්ස", en: "Rain", img: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=300" },
+                    { si: "ගඟ", en: "River", img: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=300" },
+                    { si: "කන්ද", en: "Mountain", img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300" }
+                ]
+            },
+            body: {
+                title: "👁️ අපේ ශරීරයේ කොටස්",
+                items: [
+                    { si: "ඇස", en: "Eye", img: "https://images.unsplash.com/photo-1544488135-21272c72b8ee?w=300" },
+                    { si: "කන", en: "Ear", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300" },
+                    { si: "අත", en: "Hand", img: "https://images.unsplash.com/photo-1581579438747-1dc8d1e053cc?w=300" },
+                    { si: "කකුල", en: "Leg", img: "https://images.unsplash.com/photo-1519415518370-e45b251445ce?w=300" },
+                    { si: "දත්", en: "Teeth", img: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=300" },
+                    { si: "කොණ්ඩය", en: "Hair", img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300" }
+                ]
+            },
+            habits: {
+                title: "🧹 යහපත් පරිසර පුරුදු",
+                items: [
+                    { si: "ගස් වැවීම", en: "Planting Trees", img: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=300" },
+                    { si: "කුණු බාල්දියට දැමීම", en: "Using Bin", img: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=300" },
+                    { si: "පරිසරය සුරැකීම", en: "Clean Nature", img: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300" },
+                    { si: "ජලය සුරැකීම", en: "Save Water", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4e?w=300" }
+                ]
+            }
+        };
+
+        window.openCategoryModal = function(key) {
+            const data = envData[key];
+            let html = `<div class="item-grid">`;
+
+            data.items.forEach(item => {
+                html += `
+                <div class="item-card">
+                    <img src="${item.img}" alt="${item.si}">
+                    <div class="item-name-si">${item.si}</div>
+                    <div class="item-name-en">${item.en}</div>
+                </div>`;
+            });
+            html += `</div>`;
+
+            document.getElementById('modalTitle').innerText = data.title;
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('appModal').style.display = 'flex';
+        };
+
+        window.closeModal = function() {
+            document.getElementById('appModal').style.display = 'none';
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003004594",
+            appId: "1:635003004594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        let appStarted = false;
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingText = document.getElementById('loadingText');
+        const pageContent = document.getElementById('pageContent');
+
+        function showContent() {
+            if (appStarted) return;
+            appStarted = true;
+            loadingScreen.classList.add('hidden');
+            pageContent.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            loadingText.textContent = message;
+            const btn = document.createElement('button');
+            btn.textContent = "නැවත උත්සාහ කරන්න";
+            btn.className = 'retry-btn';
+            btn.onclick = () => window.location.reload();
+            loadingScreen.appendChild(btn);
+        }
+
+        const authTimeout = setTimeout(() => {
+            if (!appStarted) {
+                showError("සම්බන්ධතාවය පරීක්ෂා කරන්න. ප්‍රවේශ වීමට නොහැකි විය.");
+            }
+        }, 10000);
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            onAuthStateChanged(auth, (user) => {
+                clearTimeout(authTimeout);
+                if (user) {
+                    showContent();
+                } else {
+                    window.location.href = "index.html";
+                }
+            });
+        } catch (err) {
+            clearTimeout(authTimeout);
+            showError("පූරණය කිරීමේදී දෝෂයක් ඇති විය.");
+        }
+    </script>
+</body>
+</html>
