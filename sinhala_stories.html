@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ලස්සන කතන්දර</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif; }
+
+        body {
+            background-color: #0f172a;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { color: #ff007f; }
+
+        .back-btn { background: #334155; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+        .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; }
+        .story-card {
+            background: #1e293b; border: 3px solid #ff007f; border-radius: 15px; padding: 12px;
+            text-align: center; cursor: pointer; color: white; transition: transform 0.2s;
+            touch-action: manipulation;
+        }
+        .story-card:active { transform: scale(0.95); }
+        .story-img { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; }
+        .story-title { font-size: 1rem; font-weight: bold; color: #38bdf8; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; padding: 20px; z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #1e293b;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            position: relative;
+            border: 3px solid #00e676; border-radius: 20px;
+            max-width: 450px; width: 100%; padding: 25px; text-align: center; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+
+        .modal-content::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 17px;
+            z-index: -1;
+        }
+
+        .modal-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; border: 2px solid #38bdf8; }
+        .modal-title { color: #00e676; font-size: 1.3rem; margin-bottom: 10px; text-shadow: 1px 1px 2px #000; }
+        .story-text { font-size: 1rem; line-height: 1.6; color: #f1f5f9; text-align: justify; margin-bottom: 15px; text-shadow: 1px 1px 2px #000; }
+        .close-btn {
+            background: #ff007f; color: white; border: none; padding: 10px 20px;
+            border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem;
+        }
+
+        .loading { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.2rem; color: #94a3b8; text-align: center; padding: 20px; }
+        .retry-btn { background: #ff007f; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading">
+        <span id="loadingText">පූරණය වෙමින්...</span>
+    </div>
+
+    <div id="pageContent" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        <header>
+            <h2>📚 ලස්සන කතන්දර</h2>
+            <a href="sinhala_pre.html" class="back-btn">⬅ ආපසු</a>
+        </header>
+
+        <p style="margin-bottom: 15px; text-align: center;">කියවන්න කැමති කතන්දරය මත ක්ලික් කරන්න:</p>
+
+        <div class="story-grid">
+            <div class="story-card" onclick="openStory(1)">
+                <img src="https://images.unsplash.com/photo-1564349683136-77e08dba1ef9?w=300" class="story-img" alt="හාවා සහ ඉබ්බා">
+                <div class="story-title">හාවා සහ ඉබ්බා 🐇🐢</div>
+            </div>
+
+            <div class="story-card" onclick="openStory(2)">
+                <img src="https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?w=300" class="story-img" alt="සිංහයා සහ මීයා">
+                <div class="story-title">සිංහයා සහ මීයා 🦁🐭</div>
+            </div>
+
+            <div class="story-card" onclick="openStory(3)">
+                <img src="https://images.unsplash.com/photo-1618172193763-c511deb635ca?w=300" class="story-img" alt="තොප්පි වෙළෙන්දා">
+                <div class="story-title">තොප්පි වෙළෙන්දා 🧢🐒</div>
+            </div>
+
+            <div class="story-card" onclick="openStory(4)">
+                <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=300" class="story-img" alt="තෘෂ්ණාධික බල්ලා">
+                <div class="story-title">තෘෂ්ණාධික බල්ලා 🐶🥩</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="storyModal" class="modal">
+        <div id="modalBox" class="modal-content">
+            <img id="mImg" src="" class="modal-img">
+            <h3 id="mTitle" class="modal-title"></h3>
+            <p id="mText" class="story-text"></p>
+            <button class="close-btn" onclick="closeStory()">වසා දමන්න ✖</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const stories = {
+            1: {
+                title: "හාවා සහ ඉබ්බා 🐇🐢",
+                img: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef9?w=500",
+                watermark: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef9?w=600",
+                text: "දවසක් හාවෙක් ඉබ්බෙකුට කිව්වා 'ඔයා හරිම හිමින් යන්නේ, මට නම් ඉක්මනට දුවන්න පුළුවන්' කියලා. ඉන්පසු දෙදෙනා තරඟයකට ලෑස්ති වුණා. හාවා වේගයෙන් දිව ගොස් ඉබ්බා ගොඩක් පිටුපසින් සිටින බව දැක ගසක් යට නිදාගත්තා. නමුත් ඉබ්බා නොනවත්වාම හෙමින් හෙමින් ඉදිරියට ගොස් තරඟය ජයගත්තා! <br><br><b>ආදර්ශය:</b> කැපවීමෙන් හා නොනවත්වා වැඩ කිරීමෙන් ජයගත හැක."
+            },
+            2: {
+                title: "සිංහයා සහ මීයා 🦁🐭",
+                img: "https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?w=500",
+                watermark: "https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?w=600",
+                text: "දිනක් සිංහයෙකු නිදා සිටියදී මීයෙක් ඇඟ මත දිවුවා. සිංහයා කෝපයෙන් මීයාව අල්ලාගත්තා. 'අනේ මාව බේරගන්න, මම කවදාහරි ඔයාට උදව් කරන්නම්' කියා මීයා ඉල්ලුවා. සිංහයා ඌට යන්න දුන්නා. දිනෙක සිංහයා වැද්දෙකුගේ දැලකට හසු වූ විට, පුංචි මීයා පැමිණ දැල සපා කපා සිංහයාව බේරාගත්තා.<br><br><b>ආදර්ශය:</b> පුංචි අයටත් ලොකු උදව් කරන්න පුළුවන්."
+            },
+            3: {
+                title: "තොප්පි වෙළෙන්දා 🧢🐒",
+                img: "https://images.unsplash.com/photo-1618172193763-c511deb635ca?w=500",
+                watermark: "https://images.unsplash.com/photo-1618172193763-c511deb635ca?w=600",
+                text: "තොප්පි වෙළෙන්දෙක් ගසක් යට නිදාගත්තා. ගසේ සිටි වඳුරන් ඇවිත් පෙට්ටියේ තිබූ තොප්පි ඔක්කොම ඔළුවේ දාගත්තා. වෙළෙන්දා අවදි වී වඳුරන්ට කෑගැසුවත් උන් ගණන් ගත්තේ නැහැ. පසුව වෙළෙන්දා තමාගේ ඔළුවේ තිබූ තොප්පිය බිමට විසිකළා. වඳුරන්ද එය අනුකරණය කර තොප්පි බිමට දැමුවා. වෙළෙන්දා සියලු තොප්පි එකතු කරගෙන ගියා.<br><br><b>ආදර්ශය:</b> ප්‍රශ්න වලදී බුද්ධිමත්ව සිතිය යුතුය."
+            },
+            4: {
+                title: "තෘෂ්ණාධික බල්ලා 🐶🥩",
+                img: "https://images.unsplash.com/photo-1552053831-71594a27632d?w=500",
+                watermark: "https://images.unsplash.com/photo-1552053831-71594a27632d?w=600",
+                text: "මස් කෑල්ලක් කටින් ඩැහැගත් බල්ලෙක් ඒදණ්ඩක් උඩින් ගමන් කළා. වතුරේ තමාගේම සෙවනැල්ල දුටු ඌ, වතුරේ සිටින්නේ වෙනත් මස් කෑල්ලක් ඇති බල්ලෙක් යැයි සිතුවා. ඒ මස් කෑල්ලත් ලබාගැනීමට බුරන්නට කට ඇරිය විට, කටේ තිබූ මස් කෑල්ල වතුරට වැටී නැතිවුණා.<br><br><b>ආදර්ශය:</b> ලෝභකම විනාශයට මුලයි."
+            }
+        };
+
+        window.openStory = function(id) {
+            const story = stories[id];
+            document.getElementById('mTitle').innerText = story.title;
+            document.getElementById('mImg').src = story.img;
+            document.getElementById('mText').innerHTML = story.text;
+            document.getElementById('modalBox').style.backgroundImage = `url('${story.watermark}')`;
+            document.getElementById('storyModal').style.display = 'flex';
+        };
+
+        window.closeStory = function() {
+            document.getElementById('storyModal').style.display = 'none';
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+            authDomain: "project-7974004196672383534.firebaseapp.com",
+            projectId: "project-7974004196672383534",
+            storageBucket: "project-7974004196672383534.firebasestorage.app",
+            messagingSenderId: "635003004594",
+            appId: "1:635003004594:web:98361476c6bca7a691cbab",
+            measurementId: "G-7QDP5TC3HW"
+        };
+
+        let appStarted = false;
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingText = document.getElementById('loadingText');
+        const pageContent = document.getElementById('pageContent');
+
+        function showContent() {
+            if (appStarted) return;
+            appStarted = true;
+            loadingScreen.classList.add('hidden');
+            pageContent.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            loadingText.textContent = message;
+            const btn = document.createElement('button');
+            btn.textContent = "නැවත උත්සාහ කරන්න";
+            btn.className = 'retry-btn';
+            btn.onclick = () => window.location.reload();
+            loadingScreen.appendChild(btn);
+        }
+
+        const authTimeout = setTimeout(() => {
+            if (!appStarted) {
+                showError("සම්බන්ධතාවය පරීක්ෂා කරන්න. ප්‍රවේශ වීමට නොහැකි විය.");
+            }
+        }, 10000);
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            onAuthStateChanged(auth, (user) => {
+                clearTimeout(authTimeout);
+                if (user) {
+                    showContent();
+                } else {
+                    window.location.href = "index.html";
+                }
+            });
+        } catch (err) {
+            clearTimeout(authTimeout);
+            showError("පූරණය කිරීමේදී දෝෂයක් ඇති විය.");
+        }
+    </script>
+</body>
+</html>
