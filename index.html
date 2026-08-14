@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Register</title>
+  <style>
+    body { font-family: sans-serif; background: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .card { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 300px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    h2 { color: #00ff88; margin-bottom: 20px; user-select: none; cursor: pointer; }
+    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #333; background: #2b2b2b; color: white; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 6px; background: #00ff88; color: black; font-weight: bold; cursor: pointer; }
+    .toggle { margin-top: 15px; font-size: 14px; cursor: pointer; color: #aaa; text-decoration: underline; }
+    #msg { margin-top: 15px; font-size: 14px; word-wrap: break-word; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Secret Triple Click Trigger on Title -->
+  <h2 id="title" onclick="handleSecretTrigger()">Register වන්න</h2>
+  <input type="email" id="email" placeholder="Email ලිපිනය">
+  <input type="password" id="password" placeholder="මුරපදය (අවම 6යි)">
+  <button id="btn" onclick="handleSubmit()">Register වන්න</button>
+  <div class="toggle" onclick="toggleMode()" id="toggleBtn">ගිණුමක් තියෙනවද? Login වන්න</div>
+  <div id="msg"></div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+    authDomain: "project-7974004196672383534.firebaseapp.com",
+    projectId: "project-7974004196672383534",
+    storageBucket: "project-7974004196672383534.firebasestorage.app",
+    messagingSenderId: "635003004594",
+    appId: "1:635003004594:web:98361476c6bca7a691cbab",
+    measurementId: "G-7QDP5TC3HW"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  let isRegisterMode = true;
+
+  function toggleMode() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById("title").innerText = isRegisterMode ? "Register වන්න" : "Login වන්න";
+    document.getElementById("btn").innerText = isRegisterMode ? "Register වන්න" : "ඇතුළු වන්න";
+    document.getElementById("toggleBtn").innerText = isRegisterMode ? "ගිණුමක් තියෙනවද? Login වන්න" : "ගිණුමක් නැද්ද? Register වන්න";
+    document.getElementById("msg").innerText = "";
+  }
+
+  function handleSubmit() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    if (!email || !password) {
+      msg.style.color = "red";
+      msg.innerText = "Email සහ Password දෙකම ඇතුළත් කරන්න.";
+      return;
+    }
+
+    msg.style.color = "yellow";
+    msg.innerText = "සූදානම් වෙමින් පවතී...";
+
+    if (isRegisterMode) {
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          msg.style.color = "#00ff88";
+          msg.innerText = "ලියාපදිංචිය සාර්ථකයි! ඇතුළු වෙමින්...";
+          setTimeout(() => { window.location.href = "home.html"; }, 1500);
+        })
+        .catch((error) => {
+          msg.style.color = "red";
+          msg.innerText = "දෝෂයයි: " + error.message;
+        });
+    } else {
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+          msg.style.color = "#00ff88";
+          msg.innerText = "ඇතුළුවීම සාර්ථකයි!";
+          setTimeout(() => { window.location.href = "home.html"; }, 1000);
+        })
+        .catch((error) => {
+          msg.style.color = "red";
+          msg.innerText = "දෝෂයයි: " + error.message;
+        });
+    }
+  }
+
+  // ==========================================
+  // 🛡️ SECRET ADMIN MULTI-STAGE AUTHENTICATION
+  // ==========================================
+  let clickCounter = 0;
+  let clickTimer;
+
+  const validMasterKeys = ["Rpca", "Ugkm", "Mone", "Fire"];
+  const decoyKeysList = ["X990", "Z881", "K112", "P554", "W337", "Q772", "B003"];
+
+  function handleSecretTrigger() {
+    clickCounter++;
+    clearTimeout(clickTimer);
+
+    if (clickCounter === 3) {
+      clickCounter = 0;
+      runAdminVerification();
+    }
+
+    clickTimer = setTimeout(() => { clickCounter = 0; }, 1200);
+  }
+
+  function runAdminVerification() {
+    // Stage 1: PIN 1
+    const p1 = prompt("[SECURITY LAYER 1/3]\nEnter Admin Secret PIN 1:");
+    if (p1 !== "0720") {
+      alert("❌ ACCESS DENIED: Invalid PIN 1!");
+      return;
+    }
+
+    // Stage 1: PIN 2
+    const p2 = prompt("[SECURITY LAYER 2/3]\nEnter Admin Secret PIN 2:");
+    if (p2 !== "0027") {
+      alert("❌ ACCESS DENIED: Invalid PIN 2!");
+      return;
+    }
+
+    // Stage 2: Dynamic Key Generation
+    const chosenMasterKey = validMasterKeys[Math.floor(Math.random() * validMasterKeys.length)];
+    let currentDecoys = [...decoyKeysList].sort(() => 0.5 - Math.random()).slice(0, 4);
+    
+    let generatedOptions = [...currentDecoys, chosenMasterKey];
+    generatedOptions.sort(() => 0.5 - Math.random()); // Randomize option positions
+
+    let promptMessage = "[SECURITY LAYER 3/3 - IDENTITY VERIFICATION]\nSelect or Type the Master Key from generated set:\n\n";
+    generatedOptions.forEach((opt, idx) => {
+      promptMessage += `${idx + 1}. ${opt}\n`;
+    });
+
+    const userSelection = prompt(promptMessage + "\nEnter Choice Number or Exact Key:");
+
+    if (!userSelection) return;
+
+    const trimmedInput = userSelection.trim();
+    const isNumberMatch = generatedOptions[parseInt(trimmedInput) - 1] === chosenMasterKey;
+    const isDirectMatch = validMasterKeys.includes(trimmedInput);
+
+    if (isNumberMatch || isDirectMatch) {
+      alert("✅ IDENTITY CONFIRMED: Welcome Master Admin!");
+      sessionStorage.setItem("adminAuthenticated", "true");
+      window.location.href = "admin.html";
+    } else {
+      alert("⚠️ CRITICAL SECURITY ERROR: Invalid Master Key Selection. System Locked!");
+    }
+  }
+</script>
+
+</body>
+</html>
