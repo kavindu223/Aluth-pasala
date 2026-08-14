@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER_CONSOLE v4.0.9</title>
+  <style>
+    :root {
+      --neon-green: #00ff66;
+      --neon-glow: rgba(0, 255, 102, 0.4);
+      --dark-bg: #030a06;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--dark-bg);
+      color: var(--neon-green);
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      margin: 0;
+      padding: 15px;
+      min-height: 100vh;
+      background-image: 
+        linear-gradient(rgba(0, 255, 102, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 102, 0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+      overflow-x: hidden;
+    }
+
+    /* Cyber Scanline Effect */
+    body::before {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* Header Styling */
+    .header-panel {
+      border: 1px solid var(--neon-green);
+      padding: 15px;
+      background: rgba(0, 20, 10, 0.7);
+      box-shadow: 0 0 15px var(--neon-glow);
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px var(--neon-green);
+      text-transform: uppercase;
+    }
+
+    .status-bar {
+      font-size: 11px;
+      margin-top: 8px;
+      color: #70ffaa;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px dashed rgba(0, 255, 102, 0.3);
+      padding-top: 5px;
+    }
+
+    /* Matrix Live Console */
+    .console-box {
+      border: 1px solid var(--neon-green);
+      background: rgba(0, 5, 2, 0.9);
+      box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.2);
+      padding: 12px;
+      height: 140px;
+      overflow-y: auto;
+      font-size: 11px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--neon-green);
+    }
+
+    .log-line {
+      margin-bottom: 4px;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .log-time { color: #008833; }
+
+    /* Request Panel */
+    .hud-card {
+      border: 1px solid var(--neon-green);
+      background: rgba(2, 12, 6, 0.85);
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.15);
+      position: relative;
+    }
+
+    .hud-title {
+      font-size: 14px;
+      font-weight: bold;
+      border-bottom: 1px solid var(--neon-green);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-node {
+      width: 8px; height: 8px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--neon-green);
+      animation: pulse 1.2s infinite alternate;
+    }
+
+    .req-item {
+      background: rgba(0, 255, 102, 0.05);
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      padding: 12px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .req-item p { margin: 3px 0; font-size: 12px; }
+
+    /* Cyber Button */
+    .cyber-btn {
+      background: var(--neon-green);
+      color: #000;
+      border: none;
+      padding: 8px 12px;
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 8px;
+      clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
+      box-shadow: 0 0 10px var(--neon-glow);
+      transition: all 0.2s;
+    }
+
+    .cyber-btn:hover {
+      background: #fff;
+      box-shadow: 0 0 15px #fff;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.3; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.2); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-5px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cyber HUD Header -->
+  <div class="header-panel">
+    <h1>⚡ MASTER_CYBER_CONSOLE ⚡</h1>
+    <div class="status-bar">
+      <span>NODE: ACTIVE</span>
+      <span>SEC_LEVEL: MAX</span>
+      <span>USER: KAVINDU_ADMIN</span>
+    </div>
+  </div>
+
+  <!-- Real-time Hacker Terminal -->
+  <div class="console-box" id="hackerLogs">
+    <div class="log-line"><span class="log-time">[SYS_INIT]</span> CORE SYSTEM ONLINE...</div>
+    <div class="log-line"><span class="log-time">[FIREBASE]</span> ENCRYPTED REALTIME DATABASE CONNECTED.</div>
+    <div class="log-line"><span class="log-time">[SCANNER]</span> WAITING FOR INCOMING SLIP NODES...</div>
+  </div>
+
+  <!-- Main Request Panel -->
+  <div class="hud-card">
+    <div class="hud-title">
+      <div class="pulse-node"></div>
+      SLIP VERIFICATION NODE [PENDING]
+    </div>
+    <div id="requestsList">
+      <p style="color: #008833; font-size: 12px;">> Scanning network for incoming payment slips...</p>
+    </div>
+  </div>
+
+  <!-- Firebase Integration -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    // Security Pass Verification
+    if (sessionStorage.getItem("adminAuthenticated") !== "true") {
+      alert("⛔ ACCESS DENIED: UNAUTHORIZED INTRUSION DETECTED.");
+      window.location.href = "index.html";
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_zzKyChOeDSJGmhd8j2clhGf0nXqdv4g",
+      authDomain: "project-7974004196672383534.firebaseapp.com",
+      projectId: "project-7974004196672383534",
+      storageBucket: "project-7974004196672383534.firebasestorage.app",
+      messagingSenderId: "635003004594",
+      appId: "1:635003004594:web:98361476c6bca7a691cbab"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function addLog(text) {
+      const logs = document.getElementById("hackerLogs");
+      const time = new Date().toLocaleTimeString();
+      logs.innerHTML += `<div class="log-line"><span class="log-time">[${time}]</span> ${text}</div>`;
+      logs.scrollTop = logs.scrollHeight;
+    }
+
+    // Live Request Listener
+    db.collection("requests").where("status", "==", "pending")
+      .onSnapshot((snapshot) => {
+        const list = document.getElementById("requestsList");
+        list.innerHTML = "";
+
+        if (snapshot.empty) {
+          list.innerHTML = "<p style='color:#008833; font-size: 12px;'>[NO_PENDING_SLIPS] Network idle.</p>";
+          return;
+        }
+
+        addLog("[ALERT] NEW PAYMENT SLIP NODE DETECTED!");
+
+        snapshot.forEach((doc) => {
+          const r = doc.data();
+          list.innerHTML += `
+            <div class="req-item">
+              <p><b>TARGET_USER:</b> ${r.userEmail}</p>
+              <p><b>TARGET_CLASS:</b> ${r.gradeId}</p>
+              <button class="cyber-btn" onclick="approveAccess('${doc.id}', '${r.userEmail}', '${r.gradeId}')">
+                [EXECUTE: GRANT_30_DAY_ACCESS]
+              </button>
+            </div>
+          `;
+        });
+      });
+
+    // Approve & 30-Day Auto Expiry Logic
+    function approveAccess(reqId, email, grade) {
+      addLog(`[PROCESS] EXECUTION STARTED FOR USER: ${email}`);
+
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+
+      db.collection("users").doc(email).set({
+        access: {
+          [grade]: {
+            status: "active",
+            valid_until: expiryDate.toISOString()
+          }
+        }
+      }, { merge: true }).then(() => {
+        db.collection("requests").doc(reqId).update({ status: "approved" });
+        addLog(`[SUCCESS] ACCESS GRANTED. EXPIRES: ${expiryDate.toLocaleDateString()}`);
+        alert(`✅ OVERRIDE SUCCESSFUL!\n30-Day access granted to ${email}`);
+      }).catch(err => {
+        addLog(`[ERROR] FAILED: ${err.message}`);
+      });
+    }
+  </script>
+</body>
+</html>
